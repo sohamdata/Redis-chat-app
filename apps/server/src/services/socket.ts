@@ -1,4 +1,10 @@
 import { Server } from "socket.io";
+import Redis from "ioredis";
+
+import { REDIS_CLIENT } from "../secrets";
+
+const pub = new Redis(REDIS_CLIENT);
+// const sub = new Redis(REDIS_CLIENT);
 
 class SocketService {
     private _io: Server;
@@ -25,8 +31,11 @@ class SocketService {
         io.on('connection', (socket) => {
             console.log('a user CONNECTED with socketId', socket.id);
 
-            socket.on('chat:message-sent', ({ message }) => {
+            socket.on('chat:message-sent', async ({ message }) => {
                 console.log('> new message:', message);
+
+                // publish message to redis
+                await pub.publish("MESSAGES", JSON.stringify(message));
             });
         })
     }
