@@ -9,6 +9,7 @@ interface SocketProviderProps {
 
 interface SocketContextProps {
     sendMessage: (message: string) => void;
+    messages?: string[];
 }
 
 const SocketContext = createContext<SocketContextProps | null>(null);
@@ -24,27 +25,36 @@ export const useSocket = () => {
 export const SocketProvider = ({ children }: SocketProviderProps) => {
     const [socket, setSocket] = useState<Socket>();
 
+    const [messages, setMessages] = useState<string[]>([]);
+
     const sendMessage = useCallback((message: string) => {
         if (socket) {
             socket.emit('chat:message-sent', { message: message });
         }
     }, [socket]);
 
+    const handleNewMessage = useCallback((message: string) => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+        console.log("message received:", message);
+    }, []);
 
     useEffect(() => {
 
-        const _SERVER = io('http://localhost:8000');
-        setSocket(_SERVER);
+        const _SOCKET = io('http://localhost:8000');
+        _SOCKET.on('chat:message-received', handleNewMessage);
+
+        setSocket(_SOCKET);
 
         return () => {
             console.log('dismounted');
             setSocket(undefined);
-            _SERVER.disconnect();
+            _SOCKET.off('chat:message-received', handleNewMessage);
+            _SOCKET.disconnect();
         }
     }, [])
 
     return (
-        <SocketContext.Provider value={{ sendMessage }}>
+        <SocketContext.Provider value={{ sendMessage, messages }}>
             {children}
         </SocketContext.Provider>
     )

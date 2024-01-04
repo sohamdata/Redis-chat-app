@@ -5,7 +5,7 @@ import { useSocket } from '../contexts/SocketProvider';
 
 export default function Page(): JSX.Element {
 
-  const { sendMessage } = useSocket();
+  const { sendMessage, messages } = useSocket();
 
   const [message, setMessage] = useState('');
 
@@ -22,6 +22,13 @@ export default function Page(): JSX.Element {
     <main>
       <input type="text" value={message} onChange={handleMessageChange} />
       <button onClick={handleSendMessage}>Send</button>
+
+      <h1 style={{ marginTop: 5 }}>Messages</h1>
+      <ul>
+        {messages?.map((message, index) => (
+          <li key={index}>{message}</li>
+        ))}
+      </ul>
     </main>
   );
 }

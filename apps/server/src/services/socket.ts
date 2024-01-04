@@ -3,8 +3,8 @@ import Redis from "ioredis";
 
 import { REDIS_CLIENT } from "../secrets";
 
-const pub = new Redis(REDIS_CLIENT);
-// const sub = new Redis(REDIS_CLIENT);
+const PUB = new Redis(REDIS_CLIENT);
+const SUB = new Redis(REDIS_CLIENT);
 
 class SocketService {
     private _io: Server;
@@ -17,6 +17,9 @@ class SocketService {
                 allowedHeaders: ['*'],
             }
         });
+
+        // subscribe to redis
+        SUB.subscribe("MESSAGES");
     }
 
     get io() {
@@ -35,9 +38,17 @@ class SocketService {
                 console.log('> new message:', message);
 
                 // publish message to redis
-                await pub.publish("MESSAGES", JSON.stringify(message));
+                await PUB.publish("MESSAGES", JSON.stringify(message));
             });
         })
+
+        SUB.on("message", (channel, message) => {
+            if (channel === "MESSAGES") {
+                io.emit('chat:message-received', message);
+            } else {
+                console.log('channel not found');
+            }
+        });
     }
 
 }
