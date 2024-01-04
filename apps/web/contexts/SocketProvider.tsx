@@ -1,18 +1,25 @@
 'use client'
 
-import { createContext, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useCallback, useEffect } from "react";
 import { io } from "socket.io-client";
 
 interface SocketProviderProps {
     children?: React.ReactNode
 }
 
-interface SockerContextProps {
+interface SocketContextProps {
     sendMessage: (message: string) => void;
 }
 
-const SocketContext = createContext<SockerContextProps | null>(null);
+const SocketContext = createContext<SocketContextProps | null>(null);
 
+export const useSocket = () => {
+    const context = useContext(SocketContext);
+    if (!context) {
+        throw new Error('useSocket must be used within a SocketProvider');
+    }
+    return context;
+}
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
 
@@ -24,8 +31,8 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
         const _SERVER = io('http://localhost:8000');
         return () => {
-            _SERVER.disconnect();
             console.log('dismounted');
+            _SERVER.disconnect();
         }
     }, [])
 
