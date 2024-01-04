@@ -25,8 +25,8 @@ class SocketService {
         io.on('connection', (socket) => {
             console.log('a user CONNECTED with socketId', socket.id);
 
-            socket.on('message', (message) => {
-                console.log('message', message);
+            socket.on('chat:message-sent', ({ message }) => {
+                console.log('> new message:', message);
             });
         })
     }

@@ -1,7 +1,7 @@
 'use client'
 
-import React, { createContext, useContext, useCallback, useEffect } from "react";
-import { io } from "socket.io-client";
+import React, { createContext, useContext, useCallback, useEffect, useState } from "react";
+import { io, Socket } from "socket.io-client";
 
 interface SocketProviderProps {
     children?: React.ReactNode
@@ -22,16 +22,23 @@ export const useSocket = () => {
 }
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
+    const [socket, setSocket] = useState<Socket>();
 
     const sendMessage = useCallback((message: string) => {
-        console.log(message);
-    }, []);
+        if (socket) {
+            socket.emit('chat:message-sent', { message: message });
+        }
+    }, [socket]);
+
 
     useEffect(() => {
 
         const _SERVER = io('http://localhost:8000');
+        setSocket(_SERVER);
+
         return () => {
             console.log('dismounted');
+            setSocket(undefined);
             _SERVER.disconnect();
         }
     }, [])
