@@ -44,6 +44,7 @@ class SocketService {
 
         SUB.on("message", (channel, message) => {
             if (channel === "MESSAGES") {
+                console.log('message recieved', message);
                 io.emit('chat:message-received', message);
             } else {
                 console.log('channel not found');
