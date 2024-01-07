@@ -1,7 +1,6 @@
 import { Server } from "socket.io";
 import Redis from "ioredis";
 
-import prisma from "./prisma";
 import { REDIS_CLIENT } from "../secrets";
 import { produceMessage } from "./kafka";
 

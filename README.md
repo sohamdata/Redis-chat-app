@@ -7,3 +7,4 @@
 - Socket.io
 - Next.js
 - Redis
+- Kafka
