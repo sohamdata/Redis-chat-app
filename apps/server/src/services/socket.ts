@@ -1,8 +1,9 @@
 import { Server } from "socket.io";
 import Redis from "ioredis";
 
-import { REDIS_CLIENT } from "../secrets";
 import prisma from "./prisma";
+import { REDIS_CLIENT } from "../secrets";
+import { produceMessage } from "./kafka";
 
 const PUB = new Redis(REDIS_CLIENT);
 const SUB = new Redis(REDIS_CLIENT);
@@ -48,11 +49,17 @@ class SocketService {
                 console.log('message recieved', message);
                 io.emit('chat:message-received', message);
 
-                await prisma.message.create({
-                    data: {
-                        text: message,
-                    }
-                });
+                // add message to db
+                // await prisma.message.create({
+                //     data: {
+                //         text: message,
+                //     }
+                // });
+
+                // publish message to kafka
+                await produceMessage(message);
+                console.log('message published to kafka');
+
 
             } else {
                 console.log('channel not found');
