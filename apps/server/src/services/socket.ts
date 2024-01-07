@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import Redis from "ioredis";
 
 import { REDIS_CLIENT } from "../secrets";
+import prisma from "./prisma";
 
 const PUB = new Redis(REDIS_CLIENT);
 const SUB = new Redis(REDIS_CLIENT);
@@ -42,10 +43,17 @@ class SocketService {
             });
         })
 
-        SUB.on("message", (channel, message) => {
+        SUB.on("message", async (channel, message) => {
             if (channel === "MESSAGES") {
                 console.log('message recieved', message);
                 io.emit('chat:message-received', message);
+
+                await prisma.message.create({
+                    data: {
+                        text: message,
+                    }
+                });
+
             } else {
                 console.log('channel not found');
             }
